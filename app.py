@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 from datetime import datetime
 
 # Page configuration
@@ -80,24 +79,22 @@ if uploaded_file is not None:
                 avg_roas = df['ROAS'].mean() if 'ROAS' in df.columns else 0
                 st.metric("Avg ROAS", f"{avg_roas:.2f}x")
             
-            # Create charts
-            st.markdown("### 📊 Performance Distribution")
+            # Simple charts using Streamlit native charts
+            st.markdown("### 📊 Performance Overview")
             
             if 'Hook Rate (%)' in df.columns:
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    fig_hook = px.histogram(df, x='Hook Rate (%)', 
-                                           title="Hook Rate Distribution",
-                                           color_discrete_sequence=['#1f77b4'])
-                    st.plotly_chart(fig_hook, use_container_width=True)
+                    st.markdown("#### Hook Rate by Creative")
+                    chart_data = df[['Ad name', 'Hook Rate (%)']].set_index('Ad name')
+                    st.bar_chart(chart_data)
                 
                 with col2:
                     if 'Hold Rate (%)' in df.columns:
-                        fig_hold = px.histogram(df, x='Hold Rate (%)', 
-                                               title="Hold Rate Distribution",
-                                               color_discrete_sequence=['#ff7f0e'])
-                        st.plotly_chart(fig_hold, use_container_width=True)
+                        st.markdown("#### Hold Rate by Creative")
+                        chart_data = df[['Ad name', 'Hold Rate (%)']].set_index('Ad name')
+                        st.bar_chart(chart_data)
         
         with tab2:
             st.markdown("### 🎬 Creative Performance Details")
@@ -127,7 +124,7 @@ if uploaded_file is not None:
             st.markdown("### 💡 Key Insights")
             
             # Find best and worst performers
-            if 'Hook Rate (%)' in df.columns:
+            if 'Hook Rate (%)' in df.columns and len(df) > 0:
                 best_hook = df.nlargest(1, 'Hook Rate (%)')['Ad name'].values[0]
                 worst_hook = df.nsmallest(1, 'Hook Rate (%)')['Ad name'].values[0]
                 
@@ -203,10 +200,9 @@ else:
             'Cost (EUR)': [50, 75, 40, 60, 100],
             'ROAS': [2.5, 3.2, 1.1, 2.8, 4.5]
         }
-        df = pd.DataFrame(sample_data)
-        st.session_state['sample_loaded'] = True
-        st.rerun()
+        st.session_state['sample_data'] = pd.DataFrame(sample_data)
+        st.success("Sample data loaded! Refresh the page to see it in action.")
 
 # Footer
 st.markdown("---")
-st.markdown("Built with ❤️ for Creative Teams | [Report Issues](mailto:your-email@example.com)")
+st.markdown("Built with ❤️ for Creative Teams")
